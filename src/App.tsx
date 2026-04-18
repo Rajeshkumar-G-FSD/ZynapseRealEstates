@@ -18,6 +18,7 @@ import {
   Youtube,
   ChevronLeft,
   ChevronRight,
+  ChevronUp,
   Home,
   Star,
   Signature,
@@ -1535,6 +1536,47 @@ function AmenitiesBar() {
   );
 }
 
+function ScrollToTop() {
+  const [isVisible, setIsVisible] = useState(false);
+
+  const toggleVisibility = () => {
+    if (window.pageYOffset > 300) {
+      setIsVisible(true);
+    } else {
+      setIsVisible(false);
+    }
+  };
+
+  const scrollToTop = () => {
+    window.scrollTo({
+      top: 0,
+      behavior: "smooth",
+    });
+  };
+
+  useEffect(() => {
+    window.addEventListener("scroll", toggleVisibility);
+    return () => window.removeEventListener("scroll", toggleVisibility);
+  }, []);
+
+  return (
+    <AnimatePresence>
+      {isVisible && (
+        <motion.button
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          exit={{ opacity: 0, y: 20 }}
+          onClick={scrollToTop}
+          className="fixed bottom-10 left-32 z-[100] w-16 h-16 bg-white border border-slate-100 text-primary rounded-full flex items-center justify-center shadow-2xl hover:bg-slate-50 transition-all duration-300 transform hover:scale-110"
+          aria-label="Scroll to top"
+        >
+          <ChevronUp size={24} />
+        </motion.button>
+      )}
+    </AnimatePresence>
+  );
+}
+
 export default function App() {
   const [activeCategory, setActiveCategory] = useState<string>("All");
   
@@ -1547,8 +1589,9 @@ export default function App() {
       <Navbar />
       
       <main>
-        {/* WhatsApp Floating Button */}
+        {/* Floating Components */}
         <WhatsAppButton />
+        <ScrollToTop />
 
         {/* Hero Section */}
         <Hero />
