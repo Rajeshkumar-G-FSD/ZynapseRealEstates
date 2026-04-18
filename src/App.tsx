@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { motion, AnimatePresence } from "motion/react";
 import { 
   Search, 
@@ -63,6 +63,9 @@ interface Property {
   offer: string;
   listings: string;
   featured?: boolean;
+  yearBuilt?: number;
+  amenities?: string[];
+  propertyType?: string;
 }
 
 // --- Mock Data ---
@@ -73,16 +76,16 @@ const LISTINGS = ["All Listings", "Featured", "Recent", "Sold"];
 
 const HERO_DATA = [
   {
-    image: "https://i.postimg.cc/GhL209Jt/Chat-GPT-Image-Apr-18-2026-04-35-22-PM.png",
-    text: "3 Modern homes for modern thinking people."
+    image: "https://images.unsplash.com/photo-1600585154340-be6161a56a0c?auto=format&fit=crop&q=80&w=2000",
+    text: "Modern homes for modern thinking people."
   },
   {
-    image: "https://i.postimg.cc/QNkQk9dy/Chat-GPT-Image-Apr-18-2026-04-43-46-PM.png",
-    text: "4 Modern homes for modern thinking people."
+    image: "https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?auto=format&fit=crop&q=80&w=2000",
+    text: "Exquisite architectural mastery at Zynapse."
   },
   {
-    image: "https://i.postimg.cc/bwv4jfB7/Chat-GPT-Image-Apr-18-2026-04-46-33-PM.png",
-    text: "6 Modern homes for modern thinking people."
+    image: "https://images.unsplash.com/photo-1600607687940-c52af04657b3?auto=format&fit=crop&q=80&w=2000",
+    text: "Your vision, our expertise, your home."
   }
 ];
 
@@ -102,37 +105,46 @@ const PROPERTIES: Property[] = [
     category: "Villa",
     offer: "For Sale",
     listings: "Featured",
-    featured: true
+    featured: true,
+    yearBuilt: 2022,
+    amenities: ["Pool", "Garden", "Security"],
+    propertyType: "Detached"
   },
   {
     id: "2",
-    title: "Country Style House with beautiful garden and terrace",
-    price: "$345,000",
+    title: "Modern Minimalist Mansion",
+    price: "$5,345,000",
     location: "Manhattan, NY",
-    beds: 9,
-    baths: 2,
-    sqft: 2561,
-    garage: 1,
+    beds: 5,
+    baths: 4,
+    sqft: 6561,
+    garage: 2,
     image: "https://images.unsplash.com/photo-1518780664697-55e3ad937233?auto=format&fit=crop&q=80&w=800",
     category: "Villa",
     offer: "For Sale",
     listings: "Featured",
-    featured: true
+    featured: true,
+    yearBuilt: 2023,
+    amenities: ["Gym", "Security", "Parking"],
+    propertyType: "Penthouse"
   },
   {
     id: "3",
-    title: "Country Style House with beautiful garden and terrace",
-    price: "$345,000",
+    title: "Beachfront Bliss Villa",
+    price: "$7,345,000",
     location: "Malibu, CA",
-    beds: 9,
-    baths: 2,
-    sqft: 2561,
-    garage: 1,
+    beds: 6,
+    baths: 5,
+    sqft: 8561,
+    garage: 3,
     image: "https://images.unsplash.com/photo-1512917774080-9991f1c4c750?auto=format&fit=crop&q=80&w=800",
     category: "Villa",
     offer: "For Sale",
     listings: "Featured",
-    featured: true
+    featured: true,
+    yearBuilt: 2024,
+    amenities: ["Pool", "Elevator", "Security"],
+    propertyType: "Waterfront"
   },
   {
     id: "4",
@@ -146,7 +158,10 @@ const PROPERTIES: Property[] = [
     image: "https://images.unsplash.com/photo-1613490493576-7fde63acd811?auto=format&fit=crop&q=80&w=800",
     category: "Villa",
     offer: "For Sale",
-    listings: "Recent"
+    listings: "Recent",
+    yearBuilt: 2021,
+    amenities: ["Pool", "Garden"],
+    propertyType: "Resort"
   },
   {
     id: "5",
@@ -321,7 +336,7 @@ function Navbar() {
       <div className="max-w-7xl mx-auto px-6 flex items-center justify-between">
         <div className="flex items-center">
           <span className={`text-3xl font-sans tracking-tight font-medium ${isScrolled ? "text-primary" : "text-white"}`}>
-            estat<span className="text-accent">e</span>
+            zynaps<span className="text-accent">e</span>
           </span>
         </div>
 
@@ -827,22 +842,22 @@ function AIAgent() {
 
   const PROJECT_OPTIONS: Record<string, string[]> = {
     "Coimbatore": [
-      "Estate Alpine (Apartments) at Saravanampatti, Coimbatore",
-      "Estate Colosseum at Avarampalayam, Coimbatore"
+      "Zynapse Alpine (Apartments) at Saravanampatti, Coimbatore",
+      "Zynapse Colosseum at Avarampalayam, Coimbatore"
     ],
     "Chennai": [
-      "Estate Marina at ECR, Chennai",
-      "Estate Zenith at OMR, Chennai"
+      "Zynapse Marina at ECR, Chennai",
+      "Zynapse Zenith at OMR, Chennai"
     ],
     "Bangalore": [
-      "Estate Silicon at Whitefield, Bangalore",
-      "Estate Gardenia at Sarjapur, Bangalore"
+      "Zynapse Silicon at Whitefield, Bangalore",
+      "Zynapse Gardenia at Sarjapur, Bangalore"
     ]
   };
 
   const [isOpen, setIsOpen] = useState(false);
   const [messages, setMessages] = useState<{ role: 'ai' | 'user'; text: string }[]>([
-    { role: 'ai', text: 'Good evening. Welcome to Estate Luxury helpdesk. Our projects cover luxury, mid-range, and affordable categories, meeting the needs of different customers. Please select your preferred budget range for the property' }
+    { role: 'ai', text: 'Good evening. Welcome to Zynapse Luxury helpdesk. Our projects cover luxury, mid-range, and affordable categories, meeting the needs of different customers. Please select your preferred budget range for the property' }
   ]);
   const [currentOptions, setCurrentOptions] = useState<string[]>(BUDGET_OPTIONS);
   const [step, setStep] = useState<'budget' | 'location' | 'project' | 'scheduling' | 'form' | 'chat'>('budget');
@@ -863,6 +878,7 @@ function AIAgent() {
   const [isVoiceEnabled, setIsVoiceEnabled] = useState(true);
   const [isListening, setIsListening] = useState(false);
   const [audioContext, setAudioContext] = useState<AudioContext | null>(null);
+  const currentAudioSource = useRef<AudioBufferSourceNode | null>(null);
 
   const initAudio = () => {
     if (!audioContext) {
@@ -873,6 +889,15 @@ function AIAgent() {
   const playPCM = async (base64Data: string) => {
     if (!audioContext) return;
     
+    // Stop any existing playback to prevent mismatch/overlap
+    if (currentAudioSource.current) {
+      try {
+        currentAudioSource.current.stop();
+      } catch (e) {
+        // Source might have finished playing
+      }
+    }
+
     try {
       const binaryString = window.atob(base64Data);
       const len = binaryString.length;
@@ -892,6 +917,7 @@ function AIAgent() {
       const source = audioContext.createBufferSource();
       source.buffer = audioBuffer;
       source.connect(audioContext.destination);
+      currentAudioSource.current = source; // Track current source
       source.start();
     } catch (err) {
       console.error("Error playing audio:", err);
@@ -955,8 +981,8 @@ function AIAgent() {
       setTimeout(() => {
         const nextMsg = "We are pleased to inform you that our projects are situated in few strategic locations, what would you prefer?";
         const projects = PROJECT_OPTIONS[textToSend] || [
-          `Estate Legacy in ${textToSend}`,
-          `Estate Horizon in ${textToSend}`
+          `Zynapse Legacy in ${textToSend}`,
+          `Zynapse Horizon in ${textToSend}`
         ];
         setMessages(prev => [...prev, { role: 'ai', text: nextMsg }]);
         setCurrentOptions(projects);
@@ -991,7 +1017,7 @@ function AIAgent() {
       ).join('\n');
 
       const systemInstruction = `
-        You are an elite real estate assistant for "Estate". 
+        You are an elite real estate assistant for "Zynapse". 
         Be professional, helpful, and sophisticated.
         Here are some properties we have:
         ${propertiesContext}
@@ -1074,7 +1100,7 @@ function AIAgent() {
                   <Sparkles size={20} className="text-blue-300" />
                 </div>
                 <div>
-                  <h3 className="font-bold text-lg leading-none mb-1">Estate AI</h3>
+                  <h3 className="font-bold text-lg leading-none mb-1">Zynapse AI</h3>
                   <div className="flex items-center gap-1.5 opacity-80">
                     <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
                     <span className="text-[10px] font-medium uppercase tracking-widest">Always Active</span>
@@ -1423,17 +1449,40 @@ function FilterSection() {
                 initial={{ opacity: 0, height: 0 }}
                 animate={{ opacity: 1, height: "auto" }}
                 exit={{ opacity: 0, height: 0 }}
-                className="grid grid-cols-1 sm:grid-cols-3 gap-6 mb-8 overflow-hidden"
+                className="mb-8 overflow-hidden"
               >
-                <select className="w-full p-4 border border-slate-200 rounded-sm focus:outline-none focus:border-accent font-medium text-sm text-text-muted appearance-none bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTIiIGhlaWdodD0iOCIgdmlld0JveD0iMCAwIDEyIDgiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PHBhdGggZD0iTTEgMUw2IDZMMTIgMSIgc3Ryb2tlPSIjOTY5Njk2IiBzdHJva2Utd2lkdGg9IjIiIHN0cm9rZS1saW5lY2FwPSJyb3VuZCIgc3Ryb2tlLWxpbmVqb2luPSJyb3VuZCIvPjwvc3ZnPg==')] bg-[length:12px_8px] bg-[right_1.5rem_center] bg-no-repeat">
-                  <option>All Types</option>
-                </select>
-                <select className="w-full p-4 border border-slate-200 rounded-sm focus:outline-none focus:border-accent font-medium text-sm text-text-muted appearance-none bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTIiIGhlaWdodD0iOCIgdmlld0JveD0iMCAwIDEyIDgiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PHBhdGggZD0iTTEgMUw2IDZMMTIgMSIgc3Ryb2tlPSIjOTY5Njk2IiBzdHJva2Utd2lkdGg9IjIiIHN0cm9rZS1saW5lY2FwPSJyb3VuZCIgc3Ryb2tlLWxpbmVqb2luPSJyb3VuZCIvPjwvc3ZnPg==')] bg-[length:12px_8px] bg-[right_1.5rem_center] bg-no-repeat">
-                  <option>All Actions</option>
-                </select>
-                <select className="w-full p-4 border border-slate-200 rounded-sm focus:outline-none focus:border-accent font-medium text-sm text-text-muted appearance-none bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTIiIGhlaWdodD0iOCIgdmlld0JveD0iMCAwIDEyIDgiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PHBhdGggZD0iTTEgMUw2IDZMMTIgMSIgc3Ryb2tlPSIjOTY5Njk2IiBzdHJva2Utd2lkdGg9IjIiIHN0cm9rZS1saW5lY2FwPSJyb3VuZCIgc3Ryb2tlLWxpbmVqb2luPSJyb3VuZCIvPjwvc3ZnPg==')] bg-[length:12px_8px] bg-[right_1.5rem_center] bg-no-repeat">
-                  <option>All City</option>
-                </select>
+                <div className="grid grid-cols-1 sm:grid-cols-3 lg:grid-cols-4 gap-6 mb-6">
+                  <select className="w-full p-4 border border-slate-200 rounded-sm focus:outline-none focus:border-accent font-medium text-sm text-text-muted appearance-none bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTIiIGhlaWdodD0iOCIgdmlld0JveD0iMCAwIDEyIDgiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PHBhdGggZD0iTTEgMUw2IDZMMTIgMSIgc3Ryb2tlPSIjOTY5Njk2IiBzdHJva2Utd2lkdGg9IjIiIHN0cm9rZS1saW5lY2FwPSJyb3VuZCIgc3Ryb2tlLWxpbmVqb2luPSJyb3VuZCIvPjwvc3ZnPg==')] bg-[length:12px_8px] bg-[right_1.5rem_center] bg-no-repeat">
+                    <option>Year Built</option>
+                    {[2024, 2023, 2022, 2021, 2020].map(yr => <option key={yr}>{yr}</option>)}
+                  </select>
+                  <select className="w-full p-4 border border-slate-200 rounded-sm focus:outline-none focus:border-accent font-medium text-sm text-text-muted appearance-none bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTIiIGhlaWdodD0iOCIgdmlld0JveD0iMCAwIDEyIDgiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PHBhdGggZD0iTTEgMUw2IDZMMTIgMSIgc3Ryb2tlPSIjOTY5Njk2IiBzdHJva2Utd2lkdGg9IjIiIHN0cm9rZS1saW5lY2FwPSJyb3VuZCIgc3Ryb2tlLWxpbmVqb2luPSJyb3VuZCIvPjwvc3ZnPg==')] bg-[length:12px_8px] bg-[right_1.5rem_center] bg-no-repeat">
+                    <option>Property Type</option>
+                    {["Detached", "Waterfront", "Resort", "Penthouse", "Townhouse"].map(t => <option key={t}>{t}</option>)}
+                  </select>
+                  <select className="w-full p-4 border border-slate-200 rounded-sm focus:outline-none focus:border-accent font-medium text-sm text-text-muted appearance-none bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTIiIGhlaWdodD0iOCIgdmlld0JveD0iMCAwIDEyIDgiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PHBhdGggZD0iTTEgMUw2IDZMMTIgMSIgc3Ryb2tlPSIjOTY5Njk2IiBzdHJva2Utd2lkdGg9IjIiIHN0cm9rZS1saW5lY2FwPSJyb3VuZCIgc3Ryb2tlLWxpbmVqb2luPSJyb3VuZCIvPjwvc3ZnPg==')] bg-[length:12px_8px] bg-[right_1.5rem_center] bg-no-repeat">
+                    <option>Min Sq Ft</option>
+                    {[500, 1000, 1500, 2000, 3000].map(s => <option key={s}>{s}+</option>)}
+                  </select>
+                  <select className="w-full p-4 border border-slate-200 rounded-sm focus:outline-none focus:border-accent font-medium text-sm text-text-muted appearance-none bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTIiIGhlaWdodD0iOCIgdmlld0JveD0iMCAwIDEyIDgiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PHBhdGggZD0iTTEgMUw2IDZMMTIgMSIgc3Ryb2tlPSIjOTY5Njk2IiBzdHJva2Utd2lkdGg9IjIiIHN0cm9rZS1saW5lY2FwPSJyb3VuZCIgc3Ryb2tlLWxpbmVqb2luPSJyb3VuZCIvPjwvc3ZnPg==')] bg-[length:12px_8px] bg-[right_1.5rem_center] bg-no-repeat">
+                    <option>Lot Size</option>
+                    <option>1/4 Acre +</option>
+                    <option>1/2 Acre +</option>
+                    <option>1 Acre +</option>
+                  </select>
+                </div>
+                
+                <div className="flex flex-wrap gap-6">
+                  {["Pool", "Gym", "Garden", "Security", "Parking", "Elevator"].map(amenity => (
+                    <label key={amenity} className="flex items-center gap-2 cursor-pointer group">
+                      <div className="w-5 h-5 border border-slate-200 rounded-sm flex items-center justify-center group-hover:bg-accent/10">
+                        <div className="w-2.5 h-2.5 bg-accent opacity-0 transition-opacity" />
+                      </div>
+                      <span className="text-sm font-medium text-text-muted select-none">{amenity}</span>
+                      <input type="checkbox" className="hidden" />
+                    </label>
+                  ))}
+                </div>
               </motion.div>
             )}
           </AnimatePresence>
